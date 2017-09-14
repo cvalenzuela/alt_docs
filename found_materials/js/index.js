@@ -31,9 +31,9 @@ let currentPlaying = [];
 let newp5 = new p5((p) => {
 
   p.preload = () => {
-    complaints = p.loadJSON('./../data/complaints.json');
+    complaints = p.loadJSON('./data/complaints.json');
     for (let i = 0; i < 24; i++) {
-      sounds[i] = p.loadSound('./../sounds/' + i + '.mp3');
+      sounds[i] = p.loadSound('./sounds/' + i + '.mp3');
     }
   }
 
