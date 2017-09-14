@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "develop": "watchify ./js/index.js -o ./dist/bundle.js -v",
+    "build": "browserify ./js/index.js -o ./dist/bundle.js"
   },
   "author": "Cristobal Valenzuela <cvalenzuela@nyu.edu> (https://github.com/cvalenzuela)",
   "license": "ISC",
   "dependencies": {
     "mappa-mundi": "0.0.4",
     "p5": "0.5.14"
+  },
+  "devDependencies": {
+    "watchify": "3.9.0"
   }
 }

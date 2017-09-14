@@ -1,0 +1,69 @@
+*{
+  margin: 0px;
+  padding: 0px;
+  overflow: hidden;
+  font-family: 'Roboto', sans-serif;
+}
+
+p{
+  font-size: 10px;
+  text-align: center;
+}
+
+#ui{
+  background: rgba(128, 128, 128, 0.75);
+  position: absolute;
+  height: 100px;
+  width: 100%;
+  bottom: 7vh;
+  z-index: 99;
+  padding-bottom: 5px;
+}
+ 
+#intervals{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+#title{
+  position: absolute;
+  z-index: 999;
+  bottom: 19vh;
+  font-size: 30px;
+  color: #f3eeee;
+  padding: 5px;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.73);
+  font-family: 'Merriweather', serif;
+}
+
+.interval{
+  display: inline-block;
+  position: absolute;
+  bottom: 0px;
+}
+
+.vertical-line{
+  height: 60px;
+  width: 65px;
+  background: #1c1e21;
+  margin: 10px auto;
+  -o-transition:.5s;
+  -ms-transition:.5s;
+  -moz-transition:.5s;
+  -webkit-transition:.5s;
+  /* ...and now for the proper property */
+  transition:.5s;
+}
+
+.vertical-line:hover{
+  background: #0766da;
+  -o-transition:.1s;
+  -ms-transition:.1s;
+  -moz-transition:.1s;
+  -webkit-transition:.1s;
+  /* ...and now for the proper property */
+  transition:.1s;
+}

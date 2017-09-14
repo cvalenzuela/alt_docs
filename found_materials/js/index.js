@@ -1,54 +1,84 @@
-// 311 Complaints
+/*
+=====
+311 Complaints
+Alt-docs
 
-var key = 'pk.eyJ1IjoibWFwcGF1c2VyIiwiYSI6ImNqNXNrbXIyZDE2a2cyd3J4Ym53YWxieXgifQ.JENDJqKE1SLISxL3Q_T22w';
+Yueping Wang
+Cristóbal Valenzuela
+ITP
+=====
+*/
 
-// Options for map
-var options = {
-  lat: 40.65548575094419,
-  lng: -73.96030504056489,
-  zoom: 12,
-  style: 'mapbox://styles/mapbox/traffic-night-v2',
+let p5 = require('p5');
+let Mappa = require('mappa-mundi');
+let key = 'pk.eyJ1IjoiY3ZhbGVuenVlbGEiLCJhIjoiY2l2ZzkweTQ3MDFuODJ5cDM2NmRnaG4wdyJ9.P_0JJXX6sD1oX2D0RQeWFA';
+let timeline = require('./timeline');
+let soundDict = require('./sounds');
+let pS = require('./../node_modules/p5/lib/addons/p5.sound.min');
+
+let options = {
+  lat: 40.744,
+  lng: -73.954,
+  zoom: 11.6,
+  style: 'mapbox://styles/cvalenzuela/cj65qbdrk6gxm2slnz6fyu6t2',
   pitch: 0
 }
+let mappa = new Mappa('Mapboxgl', key);
+let myMap, canvas, complaints;
+let sounds = [];
+let currentPlaying = [];
 
-// Create an instance of Mapboxgl
-var mappa = new Mappa('Mapboxgl', key);
-var myMap;
-var ready = false;
+let newp5 = new p5((p) => {
 
-var canvas;
-var complaints;
-
-function preload(){
-  // Load the data
-  complaints = loadJSON('../data/complaints.json', function(data){
-    ready = true;
-  });
-}
-
-function setup() {
-  canvas = createCanvas(windowWidth, windowHeight);
-  // Create a tile map and overlay the canvas on top.
-  myMap = mappa.tileMap(options);
-  myMap.overlay(canvas);
-
-  // Only redraw the meteorites when the map change and not every frame.
-  myMap.onChange(drawComplaints);
-
-  fill(109, 255, 0);
-  stroke(100);
-}
-
-// The draw loop is fully functional but we are not using it for now.
-function draw() {}
-
-function drawComplaints() {
-  // Clear the canvas
-  clear();
-  for (var c in complaints){
-    var lat = complaints[c]["lat"];
-    var lng = complaints[c]["lng"];
-    var pos = myMap.latLngToPixel(lat, lng);
-    ellipse(pos.x, pos.y, 10, 10);
+  p.preload = () => {
+    complaints = p.loadJSON('../data/complaints.json');
+    for (let i = 0; i < 24; i++) {
+      sounds[i] = p.loadSound('../sounds/' + i + '.mp3');
+    }
   }
-}
+
+  p.setup = () => {
+    canvas = p.createCanvas(p.windowWidth, p.windowHeight);
+    myMap = mappa.tileMap(options);
+    myMap.overlay(canvas);
+
+    p.fill(109, 255, 0);
+    p.stroke(100);
+
+  }
+
+  p.draw = () => {
+
+  };
+
+  let drawComplaints = (lat, lng) => {
+    let pos = myMap.latLngToPixel(lat, lng);
+    p.ellipse(pos.x, pos.y, 10, 10);
+  }
+
+  let makeSound = (types, largest) => {
+    for(let type in types){
+      let soundIndex = soundDict[type];
+      let sound = sounds[soundIndex];
+      let volume = p.map(types[type], 0, largest, 0, 1);
+      currentPlaying.push(sound);
+      if (sound) {
+        sound.setVolume(volume)
+        sound.play();
+      }
+    }
+  }
+
+  let clearCanvas = () => {
+    p.clear();
+    currentPlaying.forEach((s)=>{
+      s && s.stop();
+    });
+    currentPlaying = [];
+  }
+
+  window.makeSound = makeSound;
+  window.clearCanvas = clearCanvas;
+  window.drawComplaints = drawComplaints;
+
+}, 'dom-elem');
