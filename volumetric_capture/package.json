@@ -1,0 +1,19 @@
+{
+  "name": "volumetric_capture",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify js/index.js -o bundle/index.js",
+    "watch": "watchify js/index.js -o bundle/index.js"
+  },
+  "author": "Cristobal Valenzuela <cvalenzuela@nyu.edu> (https://github.com/cvalenzuela)",
+  "license": "ISC",
+  "devDependencies": {
+    "browserify": "14.4.0",
+    "watchify": "3.9.0"
+  },
+  "dependencies": {
+    "three": "0.87.1"
+  }
+}
