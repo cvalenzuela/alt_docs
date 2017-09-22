@@ -14,6 +14,7 @@
     color: white;
     color: white;
     font-family: Helvetica, arial, sans-serif;
+    background: black;
   }
   canvas {
     width: 100%;
@@ -23,6 +24,13 @@
     position: absolute;
     margin: 4vh;
   }
+  #loader{
+    position: absolute;
+    margin: 40vh 50%;
+  }
+  #loading{
+    width: 80px;
+  }
   </style>
 </head>
 
@@ -31,6 +39,10 @@
       <h1>Volumetric Capture</h1>
       <p>Mannequin</p>
   </div>
+  <div id="loader">
+      <img src="imgs/loading.gif" alt="loading" id="loading">
+  </div>
+  
   
   <script src="bundle/index.js"></script>
 </body>

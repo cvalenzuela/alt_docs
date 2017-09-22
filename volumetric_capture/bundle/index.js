@@ -4,31 +4,39 @@ Alt Docs Volumetric Captures
 */
 
 const THREE = require('three');
+const utils = require('./utils');
 
-let path = './../models/mannequin/';
-let container;
-let camera, scene, renderer;
-let mousePosition = { x: 0, y: 0 };
-let previousMousePosition = { x: 0, y: 0 };
-let isDragging = false;
+let objectName = 'mannequin';
+
+let path = './models/' + objectName + '/json/';
+let container, camera, scene, renderer, dollyObject, manager;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
-let dollyObject;
-let manager;
-let focalLength = 25.734;
+let loading = document.getElementById('loading');
+let isDragging = false;
 
-init();
+let render = () => {
+  camera.lookAt(scene.position);
+  renderer.render(scene, camera);
+}
 
-function init() {
-  // DOM
+let animate = () => {
+  requestAnimationFrame(animate);
+  dollyObject.rotation.y += 0.01;
+  render();
+}
+
+let init = () => {
+
+  // Append to DOM
   container = document.createElement('div');
   document.body.appendChild(container);
 
-  // camera
+  // Camera
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.z = 5;
 
-  // scene
+  // Scene
   scene = new THREE.Scene();
   let ambient = new THREE.AmbientLight(0x444444);
   scene.add(ambient);
@@ -36,7 +44,7 @@ function init() {
   directionalLight.position.set(0, 0, 1).normalize();
   scene.add(directionalLight);
 
-  // loading manager
+  // Loading manager
   manager = new THREE.LoadingManager();
 
   manager.onProgress = xhr => {
@@ -47,44 +55,65 @@ function init() {
   }
 
   manager.onLoad = () => {
+    loading.style.display = 'none';
     animate();
   }
 
-  let mannequin = new THREE.JSONLoader(manager).load(path + 'json/' + 'mannequin.js', (geometry) => {
+  // Object Loader
+  let objectToLoad = new THREE.JSONLoader(manager).load(path + objectName + '.js', (geometry) => {
     let material = new THREE.MeshBasicMaterial();
     dollyObject = new THREE.Mesh(geometry, material);
 
-    material.map = new THREE.TextureLoader(manager).load(path + 'json/' + 'mannequin.jpg');
+    material.map = new THREE.TextureLoader(manager).load(path + objectName + '.jpg');
     scene.add(dollyObject);
   })
 
+  // Render
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(renderer.domElement);
 
   // Event Listeners
-  document.addEventListener('mousedown', function() { isDragging = true; });
-  document.addEventListener('mouseup', function() { isDragging = false; });
-  window.addEventListener('DOMMouseScroll', onScroll, false);
-  window.addEventListener('mousewheel', onScroll, false);
-  window.addEventListener('resize', onWindowResize, false);
-  document.addEventListener('mousemove', onDocumentMouseMove, false);
+  document.addEventListener('mousedown', () => { isDragging = true; });
+  document.addEventListener('mouseup', () => { isDragging = false; });
+  window.addEventListener('DOMMouseScroll', (e) => { utils.onScroll(e, camera) }, false);
+  window.addEventListener('mousewheel', (e) => { utils.onScroll(e, camera) }, false);
+  window.addEventListener('resize', (e) => { utils.onWindowResize(e, renderer, camera) }, false);
+  document.addEventListener('mousemove', (e) => { utils.onDocumentMouseMove(e, dollyObject, isDragging) }, false);
 }
 
-function onScroll(e) {
-  e.deltaY > 0 ? focalLength += 4: focalLength -= 4;
+// Start
+init();
+},{"./utils":2,"three":3}],2:[function(require,module,exports){
+/*
+Set of utils for Three.js
+Cristobal Valenzuela
+*/
+
+const THREE = require('three');
+
+// ----
+// Change zoom based on mouse Scroll
+// ----
+let focalLength = 25.734;
+let onScroll = (scroll, camera) => {
+  scroll.deltaY > 0 ? focalLength += 4 : focalLength -= 4;
   camera.setFocalLength(focalLength);
 }
 
-function onDocumentMouseMove(e) {
+// ----
+// Move Object based on mouse movement
+// ----
+let mousePosition = { x: 0, y: 0 };
+let previousMousePosition = { x: 0, y: 0 };
+let onDocumentMouseMove = (mouse, object, isDragging) => {
   let deltaMove = {
-    x: e.offsetX - previousMousePosition.x,
-    y: e.offsetY - previousMousePosition.y
+    x: mouse.offsetX - previousMousePosition.x,
+    y: mouse.offsetY - previousMousePosition.y
   };
 
   if (isDragging) {
-
     let deltaRotationQuaternion = new THREE.Quaternion()
       .setFromEuler(new THREE.Euler(
         toRadians(deltaMove.y * 1),
@@ -92,41 +121,46 @@ function onDocumentMouseMove(e) {
         0,
         'XYZ'
       ));
-
-    dollyObject.quaternion.multiplyQuaternions(deltaRotationQuaternion, dollyObject.quaternion);
+    object.quaternion.multiplyQuaternions(deltaRotationQuaternion, object.quaternion);
   }
 
   previousMousePosition = {
-    x: e.offsetX,
-    y: e.offsetY
+    x: mouse.offsetX,
+    y: mouse.offsetY
   };
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-  dollyObject.rotation.y += 0.01;
-  render();
-}
-
-function render() {
-  camera.lookAt(scene.position);
-  renderer.render(scene, camera);
-}
-
-function onWindowResize(event) {
+// ----
+// Recenter when window is resized
+// ----
+let onWindowResize = (e, renderer, camera) => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 }
 
-function toRadians(angle) {
+// ----
+// Angles to Radians
+// ----
+let toRadians = angle => {
   return angle * (Math.PI / 180);
 }
 
-function toDegrees(angle) {
+// ----
+// Radians to Degrees
+// ----
+let toDegrees = angle => {
   return angle * (180 / Math.PI);
 }
-},{"three":2}],2:[function(require,module,exports){
+
+module.exports = {
+  onScroll: onScroll,
+  onDocumentMouseMove: onDocumentMouseMove,
+  onWindowResize: onWindowResize,
+  toRadians: toRadians,
+  toDegrees: toDegrees
+}
+},{"three":3}],3:[function(require,module,exports){
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
