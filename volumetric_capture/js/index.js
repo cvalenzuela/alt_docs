@@ -5,10 +5,10 @@ Alt Docs Volumetric Captures
 const THREE = require('three');
 const utils = require('./utils');
 
-let objectName = 'mannequin';
-
-let path = './models/' + objectName + '/json/';
-let container, camera, scene, renderer, dollyObject, manager;
+let objects = ['mannequin', 'world', 'cris'];
+let loadedModels = {};
+// let path = './models/' + objectName + '/json/';
+let container, camera, scene, renderer, currentObject, manager;
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 let loading = document.getElementById('loading');
@@ -21,7 +21,7 @@ let render = () => {
 
 let animate = () => {
   requestAnimationFrame(animate);
-  dollyObject.rotation.y += 0.01;
+  !isDragging && (currentObject.rotation.y += 0.01);
   render();
 }
 
@@ -59,12 +59,18 @@ let init = () => {
   }
 
   // Object Loader
-  let objectToLoad = new THREE.JSONLoader(manager).load(path + objectName + '.js', (geometry) => {
-    let material = new THREE.MeshBasicMaterial();
-    dollyObject = new THREE.Mesh(geometry, material);
-
-    material.map = new THREE.TextureLoader(manager).load(path + objectName + '.jpg');
-    scene.add(dollyObject);
+  objects.forEach((model, i) => {
+    let path = './models/' + model + '/json/' + model;
+    let objectToLoad = new THREE.JSONLoader(manager).load(path + '.js', (geometry) => {
+      let material = new THREE.MeshBasicMaterial();
+      let dollyObject = new THREE.Mesh(geometry, material);
+      material.map = new THREE.TextureLoader(manager).load(path + '.jpg');
+      loadedModels[model] = dollyObject;
+      if(i == 0){
+        document.addEventListener('mousemove', (e) => { utils.onDocumentMouseMove(e, currentObject, isDragging) }, false);
+        scene.add(dollyObject) && (currentObject = dollyObject);
+      }
+    })
   })
 
   // Render
@@ -79,8 +85,21 @@ let init = () => {
   window.addEventListener('DOMMouseScroll', (e) => { utils.onScroll(e, camera) }, false);
   window.addEventListener('mousewheel', (e) => { utils.onScroll(e, camera) }, false);
   window.addEventListener('resize', (e) => { utils.onWindowResize(e, renderer, camera) }, false);
-  document.addEventListener('mousemove', (e) => { utils.onDocumentMouseMove(e, dollyObject, isDragging) }, false);
 }
 
+// Change model with radio btns
+let changeModel = (e) => {
+  for(let model in loadedModels){
+    if(e.value == model){
+      currentObject = loadedModels[model];
+      document.addEventListener('mousemove', (e) => { utils.onDocumentMouseMove(e, currentObject, isDragging) }, false);
+      scene.add(currentObject);
+    } else{
+      scene.remove(loadedModels[model]);
+    }
+  }
+}
+
+window.changeModel = changeModel;
 // Start
 init();

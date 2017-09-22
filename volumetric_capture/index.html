@@ -20,6 +20,9 @@
     width: 100%;
     height: 100%
   }
+  input{
+    margin: 10px;
+  }
   #description{
     position: absolute;
     margin: 4vh;
@@ -31,6 +34,12 @@
   #loading{
     width: 80px;
   }
+  #models{
+    position: absolute;
+    bottom: 3vh;
+    right: 3vw;
+  }
+
   </style>
 </head>
 
@@ -39,10 +48,14 @@
       <h1>Volumetric Capture</h1>
       <p>Mannequin</p>
   </div>
+  <div id="models">
+    <input type="radio" name="model" checked onclick="changeModel(this);" value="mannequin">Mannequin
+    <input type="radio" name="model" onclick="changeModel(this);" value="world">World
+    <input type="radio" name="model" onclick="changeModel(this);" value="cris">Cris
+  </div>
   <div id="loader">
       <img src="imgs/loading.gif" alt="loading" id="loading">
   </div>
-  
   
   <script src="bundle/index.js"></script>
 </body>
